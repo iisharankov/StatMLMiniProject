@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import sklearn.discriminant_analysis as skl_da
 
+import crossvalidation as cv
 
 df_train = pd.read_csv(const.TRAIN_DATASET)
 df_final = pd.read_csv(const.TEST_DATASET)
@@ -37,6 +38,8 @@ y_test = movie_train['Lead'].values.ravel()
 x_test = movie_test.loc[:, df_train.columns != 'Lead']
 
 #%%
+# Basic LDA Stuff
+
 LDA = skl_da.LinearDiscriminantAnalysis()
 model = LDA.fit(x_train,y_train)
 y_predict_LDA = model.predict(x_test)
@@ -44,6 +47,12 @@ y_predict_LDA = model.predict(x_test)
 error = np.mean(y_predict_LDA != y_test)
 print('\nLDA error: ',error)
 print(pd.crosstab(y_predict_LDA,y_test))
+#%%
+# LDA with cross validation
+#define all inputs to use
+inputs = df_final.keys()
+Enew = cv.n_crossvalidation(10,LDA,df_train,inputs,'Lead')
+print(Enew)
 
 #%%
 QDA = skl_da.QuadraticDiscriminantAnalysis()
