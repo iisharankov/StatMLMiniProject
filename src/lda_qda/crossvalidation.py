@@ -25,14 +25,24 @@ def n_crossvalidation(n,method,train_data,inputs,output):
        validation = train_data.iloc[validation_indices]
        ind_train = np.delete(train_data.index,validation_indices, axis=0)
        training = train_data.iloc[ind_train]
-       x_train = training[inputs]
-       y_train = training[output].values.ravel()
-       x_val = validation[inputs]
+       
+       
+       
+       
+       if len(inputs) <=1:
+           x_val = validation[inputs].values.reshape(-1, 1)
+           x_train = training[inputs].values.reshape(-1, 1)
+       else:
+           x_train = training[inputs]
+           x_val = validation[inputs]
+           
        y_val = validation[output].values.ravel()
+       y_train = training[output].values.ravel()
+       
        e_vec[i]=method_error(method,x_train,y_train, x_val, y_val)
        i+=1
        
-   return np.mean(e_vec)
+   return np.mean(e_vec),e_vec
     
 
     
