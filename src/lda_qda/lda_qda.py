@@ -138,21 +138,15 @@ qda_enew, qda_vec=qda_crossvalidation(optimal_inputs, df_train, 10)
 lda_enew, lda_vec = lda_crossvalidation(optimal_inputs, df_train, 10)
 
 #BOXPLOTS
+logreg_vec = np.array([0.125, 0.0961538, 0.134615, 0.115385, 0.163462, 0.163462, 0.0576923, 0.134615, 0.134615, 0.15534])
+kNN_vec = np.array([0.18269231, 0.125, 0.18269231, 0.14423077, 0.22115385, 0.21153846, 0.19230769, 0.19230769, 0.20192308, 0.16504854])
+tree_vec = np.array([0.18269231, 0.16346154, 0.20192308, 0.24038462, 0.13461538, 0.20192308, 0.17307692, 0.18269231, 0.19230769, 0.23300971])
+forest_vec = np.array([0.15384615, 0.07692308, 0.17307692, 0.13461538, 0.16346154, 0.18269231, 0.13461538, 0.20192308, 0.18269231, 0.11650485])
+bagging_vec = np.array([0.20192308, 0.13461538, 0.20192308, 0.16346154, 0.20192308, 0.24038462, 0.13461538, 0.19230769, 0.21153846, 0.15533981])
 
-logreg_vec = np.array( [[0.125],[0.0961538],[0.134615],[0.115385],[0.163462],[0.163462],[0.0576923],[0.134615],[0.134615],[0.15534]] )
-
-kNN_vec = np.array([[0.18269231],[0.125],[0.18269231],[0.14423077],[0.22115385],[0.21153846],[0.19230769],[0.19230769],[0.20192308],[0.16504854]])
-
-tree_vec = 1-np.array([0.81730769,0.83653846, 0.79807692, 0.75961538, 0.86538462, 0.79807692, 0.82692308, 0.81730769, 0.80769231, 0.76699029])
-
-forest_vec = 1-np.array([0.84615385, 0.92307692, 0.82692308, 0.86538462, 0.83653846, 0.81730769,
- 0.86538462, 0.79807692, 0.81730769, 0.88349515])
-
-bagging_vec =1- np.array([0.79807692, 0.86538462, 0.79807692, 0.83653846, 0.79807692, 0.75961538,
- 0.86538462, 0.80769231, 0.78846154, 0.84466019])
-
-plt.boxplot([logreg_vec.flatten(),lda_vec, qda_vec, kNN_vec.flatten(), tree_vec, forest_vec, bagging_vec])
-plt.xticks([1, 2, 3,4,5,6,7], ['logistic \n regression', 'LDA', 'QDA', 'kNN', 'class. \ntree', 'random \nforest', 'bagging'])
+plt.boxplot([logreg_vec, lda_vec, qda_vec, kNN_vec, tree_vec, forest_vec, bagging_vec])
+plt.xticks([1, 2, 3, 4, 5, 6, 7],
+           ['logistic \n regression', 'LDA', 'QDA', 'kNN', 'class. \ntree', 'random \nforest', 'bagging'])
 plt.show()
 
 
@@ -165,13 +159,27 @@ def feat_importance_plots(df_train):
         else:
             val = row['Number words female']
         return val
-    
+
+
+
     df_train['No. all words female'] = df_train.apply(female_lead, axis=1)
     df_train['No. all words male'] = df_train['Total words']-df_train['No. all words female']
+    ratio_male_words = 100 * (df_train['No. all words male']/(df_train['No. all words male']+df_train['No. all words female']))
 
-    plt.scatter(df_train['Year'],df_train['No. all words male']/(df_train['No. all words male']+df_train['No. all words female']))
-    plt.show()
-    plt.scatter(df_train['No. all words male']/(df_train['No. all words male']+df_train['No. all words female']),df_train['Gross'])
+    plt.subplot(211)
+    plt.scatter(df_train['Year'], ratio_male_words, marker='.')
+    plt.title("a) Percentage of script spoken by males vs. time")
+    plt.xlabel("Year")
+    plt.ylabel("Words spoken by males (%)")
+    plt.grid()
+    plt.subplot(212)
+
+    plt.scatter(ratio_male_words, df_train['Gross'], marker='.')
+    plt.title("b) Effect of male actors on film income")
+    plt.xlabel("Words spoken by males (%)")
+    plt.ylabel("Gross product of film")
+    plt.grid()
+    plt.tight_layout()
     plt.show()
     
     female_words = sum(df_train['No. all words female'])
@@ -181,6 +189,7 @@ def feat_importance_plots(df_train):
 #%%
 
 feat_importance_plots(df_train)
+raise Exception
 
 prob3_inputs = ['Number words female','Number words male','Year','Gross']
 
