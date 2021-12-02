@@ -15,13 +15,18 @@ import src.constants as const
 def clean_x_and_y(data):
     # Convert 'Lead' attribute to string, then to boolean and set as y_train
     x = data.loc[:, data.columns != "Lead"]  # Extract lead from x data
-    y = data['Lead'].map({'Female': -1, 'Male': 1})  # Convert leads to bools
+    # x = data[["Number words female", "Number of female actors", "Number of male actors"]]
+    y = data['Lead'].map({'Female': 0, 'Male': 1})  # Convert leads to bools
     return x, y
 
 
 def classification_tree():
     clf = sklearn.tree.DecisionTreeClassifier(max_depth=7, random_state=0)
     clf.fit(X_train, Y_train)
+    importances = pd.DataFrame({'feature': X_train.columns, 'importance': np.round(clf.feature_importances_, 3)})
+    importances = importances.sort_values('importance', ascending=False)
+    print(f"importances are\n {importances}")
+
     return clf
 
 
@@ -33,10 +38,9 @@ def random_forest():
 def bagging():
     bg_pipeline = make_pipeline(StandardScaler(), LogisticRegression(random_state=1))
 
-    # Instantiate the bagging classifier
     bgclassifier = sklearn.ensemble.BaggingClassifier(
         base_estimator=bg_pipeline, n_estimators=100,
-        max_features=10, max_samples=100,
+        max_features=X_train.shape[1], max_samples=100,
         random_state=1, n_jobs=5
     )
 
@@ -50,7 +54,7 @@ def cross_validation(model, x, y, n):
     scores = sklearn.model_selection.cross_val_score(
         model, x, y, cv=cv, n_jobs=1)
 
-    print(len(scores), scores)
+    # print(len(scores), scores)
     print(f"cross_validation: {np.mean(np.absolute(scores))}")
 
 
@@ -62,7 +66,7 @@ if __name__ == "__main__":
         data = pd.read_csv(const.TRAIN_DATASET)  # Import dataset
         X_train, Y_train = clean_x_and_y(data)
 
-    gaps = 1 # 104
+    gaps = 5 # 104\
     n = int(np.ceil(len(X_train) / gaps))
 
     print("Starting Simple Classification Trees method")
