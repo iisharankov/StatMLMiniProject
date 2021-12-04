@@ -7,7 +7,7 @@ import sklearn
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import BaggingClassifier
+from sklearn.ensemble import BaggingClassifier, AdaBoostClassifier
 from sklearn.pipeline import make_pipeline
 
 import src.constants as const
@@ -23,9 +23,9 @@ def clean_x_and_y(data):
 def classification_tree():
     clf = sklearn.tree.DecisionTreeClassifier(max_depth=7, random_state=0)
     clf.fit(X_train, Y_train)
-    importances = pd.DataFrame({'feature': X_train.columns, 'importance': np.round(clf.feature_importances_, 3)})
-    importances = importances.sort_values('importance', ascending=False)
-    print(f"importances are\n {importances}")
+    # importances = pd.DataFrame({'feature': X_train.columns, 'importance': np.round(clf.feature_importances_, 3)})
+    # importances = importances.sort_values('importance', ascending=False)
+    # print(f"importances are\n {importances}")
 
     return clf
 
@@ -41,7 +41,7 @@ def bagging():
     bgclassifier = sklearn.ensemble.BaggingClassifier(
         base_estimator=bg_pipeline, n_estimators=100,
         max_features=X_train.shape[1], max_samples=100,
-        random_state=1, n_jobs=5
+        random_state=12, n_jobs=5
     )
 
     # Fit the bagging classifier
@@ -50,13 +50,18 @@ def bagging():
 
 
 def cross_validation(model, x, y, n):
-    cv = sklearn.model_selection.KFold(n_splits=n, random_state=1, shuffle=True)
+    cv = sklearn.model_selection.KFold(n_splits=n, random_state=12, shuffle=True)
     scores = sklearn.model_selection.cross_val_score(
         model, x, y, cv=cv, n_jobs=1)
 
-    # print(len(scores), scores)
+    print(len(scores), scores)
     print(f"cross_validation: {np.mean(np.absolute(scores))}")
 
+def adaboosting():
+    boost = AdaBoostClassifier(sklearn.tree.DecisionTreeClassifier(max_depth=7),
+                               n_estimators=n, random_state=1)
+    boost.fit(X_train, Y_train)
+    return boost
 
 if __name__ == "__main__":
     if not os.path.exists(const.TEST_DATASET) or not os.path.exists(const.TRAIN_DATASET):
@@ -66,18 +71,21 @@ if __name__ == "__main__":
         data = pd.read_csv(const.TRAIN_DATASET)  # Import dataset
         X_train, Y_train = clean_x_and_y(data)
 
-    gaps = 5 # 104\
+    gaps = 104
     n = int(np.ceil(len(X_train) / gaps))
 
-    print("Starting Simple Classification Trees method")
-    clf = classification_tree()
-    cross_validation(clf, X_train, Y_train, n)
+    # print("Starting Simple Classification Trees method")
+    # clf = classification_tree()
+    # cross_validation(clf, X_train, Y_train, n)
+    #
+    # print("\nStarting Random Forrest method")
+    # rfc = random_forest()
+    # cross_validation(rfc, X_train, Y_train, n)
+    #
+    # print("\nStarting Bagging method")
+    # bag = bagging()
+    # cross_validation(bag, X_train, Y_train, n)
 
-
-    print("-\n Starting Random Forrest method")
-    rfc = random_forest()
-    cross_validation(rfc, X_train, Y_train, n)
-
-    print("-\n Starting Bagging method")
-    bag = bagging()
-    cross_validation(bag, X_train, Y_train, n)
+    print("\nStarting Boosting method")
+    boost = adaboosting()
+    cross_validation(boost, X_train, Y_train, n)
