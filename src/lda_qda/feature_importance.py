@@ -124,11 +124,14 @@ forest_vec = 1-np.array([0.84615385, 0.92307692, 0.82692308, 0.86538462, 0.83653
 bagging_vec =1- np.array([0.79807692, 0.86538462, 0.79807692, 0.83653846, 0.79807692, 0.75961538,
  0.86538462, 0.80769231, 0.78846154, 0.84466019])
 
-boosting_vec = np.array([0.22115385, 0.10576923, 0.125     , 0.14423077, 0.21153846,
-       0.13461538, 0.16346154, 0.14423077, 0.14423077, 0.25242718])
+ADAboosting_vec = np.array([0.14423077, 0.10576923, 0.125,      0.18269231, 0.14423077, 0.20192308
+, 0.11538462, 0.125,      0.20192308, 0.16504854])
 
-plt.boxplot([logreg_vec.flatten(),lda_vec, qda_vec, kNN_vec.flatten(), tree_vec, forest_vec, bagging_vec, boosting_vec])
-plt.xticks([1, 2, 3,4,5,6,7,8], ['logistic \n regression', 'LDA', 'QDA', 'kNN', 'class. \ntree', 'random \nforest', 'bagging', 'boosting'])
+grad_boosting_vec = np.array([0.16346154, 0.11538462, 0.17307692, 0.17307692, 0.125,      0.18269231
+, 0.11538462, 0.14423077, 0.20192308, 0.10679612])
+
+plt.boxplot([logreg_vec.flatten(),lda_vec, qda_vec, kNN_vec.flatten(), tree_vec, forest_vec, bagging_vec, ADAboosting_vec, grad_boosting_vec])
+plt.xticks([1, 2, 3,4,5,6,7,8,9], ['logistic \n regression', 'LDA', 'QDA', 'kNN', 'class. \ntree', 'random \nforest', 'bagging', 'ADA \nboost', 'Gradient \nboost'])
 plt.show()
 
 #%%
