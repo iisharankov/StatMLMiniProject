@@ -33,6 +33,7 @@ y = train_all["Lead"]
 
 K = np.arange(1,50)
 n_fold = 1039
+n_fold = 10
 
 kf = KFold(n_splits=n_fold, random_state=1, shuffle=True)
 
@@ -91,6 +92,7 @@ for i, (train_index, test_index) in enumerate(kf.split(X)):
         err = np.mean(pred_class != y_val)
         miss_best[i,m] = err
 
+print(miss_best)
 
 plt.boxplot(miss_best)
 plt.title("Cross validation error for kNN")
