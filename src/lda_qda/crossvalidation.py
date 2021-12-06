@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Nov 18 13:27:38 2021
 
-@author: linasundqvist
-"""
 import numpy as np
 import sklearn.model_selection as skl_ms
 
