@@ -10,7 +10,7 @@ import crossvalidation as cv
 import numpy as np
 import pandas as pd
 import sklearn.discriminant_analysis as skl_da
-
+from matplotlib.pyplot import figure
 import warnings
 import matplotlib.pyplot as plt
 
@@ -42,11 +42,27 @@ def task3_plots(df_train):
     
     df_train['No. all words female'] = df_train.apply(female_lead, axis=1)
     df_train['No. all words male'] = df_train['Total words']-df_train['No. all words female']
+    ratio_male_words = 100 * (df_train['No. all words male']/(df_train['No. all words male']+df_train['No. all words female']))
 
-    plt.scatter(df_train['Year'],df_train['No. all words male']/(df_train['No. all words male']+df_train['No. all words female']))
+    plt.subplot(211)
+    plt.scatter(df_train['Year'], ratio_male_words, marker='.')
+    plt.title("a) Percentage of script spoken by males vs. time")
+    plt.xlabel("Year")
+    plt.ylabel("Words spoken by males (%)")
+    plt.grid()
+    plt.subplot(212)
+
+    plt.scatter(ratio_male_words, df_train['Gross'], marker='.')
+    plt.title("b) Effect of male actors on film income")
+    plt.xlabel("Words spoken by males (%)")
+    plt.ylabel("Gross product of film")
+    plt.grid()
+    plt.tight_layout()
     plt.show()
-    plt.scatter(df_train['No. all words male']/(df_train['No. all words male']+df_train['No. all words female']),df_train['Gross'])
-    plt.show()
+
+    female_words = sum(df_train['No. all words female'])
+    male_words = sum(df_train['No. all words male'])
+    print(f"fraction of  words spoken by female {female_words/(female_words+male_words)}")
     
     female_words = sum(df_train['No. all words female'])
     male_words = sum(df_train['No. all words male'])
@@ -108,7 +124,7 @@ def split_test_train(size,dataframe,y,x=None,**kwargs):
 QDA = skl_da.QuadraticDiscriminantAnalysis() 
 LDA = skl_da.LinearDiscriminantAnalysis() 
 
-
+np.random.seed(1)
 qda_enew, qda_vec = cv.n_crossvalidation(10,QDA,df_train,optimal_inputs,'Lead')
 lda_enew, lda_vec = cv.n_crossvalidation(10,LDA,df_train,optimal_inputs,'Lead')
 
@@ -132,57 +148,60 @@ grad_boosting_vec = np.array([0.16346154, 0.11538462, 0.17307692, 0.17307692, 0.
 
 plt.boxplot([logreg_vec.flatten(),lda_vec, qda_vec, kNN_vec.flatten(), tree_vec, forest_vec, bagging_vec, ADAboosting_vec, grad_boosting_vec])
 plt.xticks([1, 2, 3,4,5,6,7,8,9], ['logistic \n regression', 'LDA', 'QDA', 'kNN', 'class. \ntree', 'random \nforest', 'bagging', 'ADA \nboost', 'Gradient \nboost'])
+plt.tight_layout()
 plt.show()
 
 #%%
 #Task 3) Feature importance (QDA)) 
 
-task3_plots(df_train)
+def task_three():
 
-prob3_inputs = ['Number words female','Number words male','Year','Gross']
+    task3_plots(df_train)
 
-QDA = skl_da.QuadraticDiscriminantAnalysis()  
+    prob3_inputs = ['Number words female','Number words male','Year','Gross']
 
-rs = 0.01*(np.arange(-1,100)+1)
-FF= np.zeros((len(rs),4))
-TF = np.zeros((len(rs),4))
-j = 0
+    QDA = skl_da.QuadraticDiscriminantAnalysis()  
 
-for i in prob3_inputs:
-    inputs = ['Number words female', 'Total words', 'Number of words lead',
-       'Difference in words lead and co-lead', 'Number of male actors', 'Year',
-       'Number of female actors', 'Number words male', 'Gross',
-       'Mean Age Male', 'Mean Age Female', 'Age Lead', 'Age Co-Lead']
+    rs = 0.01*(np.arange(-1,100)+1)
+    FF= np.zeros((len(rs),4))
+    TF = np.zeros((len(rs),4))
+    j = 0
+
+    for i in prob3_inputs:
+        inputs = ['Number words female', 'Total words', 'Number of words lead',
+                  'Difference in words lead and co-lead', 'Number of male actors', 'Year',
+                  'Number of female actors', 'Number words male', 'Gross',
+                  'Mean Age Male', 'Mean Age Female', 'Age Lead', 'Age Co-Lead']
     
-    inputs.remove(i)
-    error,evec = cv.n_crossvalidation(1039,QDA,df_train,inputs,'Lead')
-    print(f"error when omitting {i}: {error}")
+        inputs.remove(i)
+        error,evec = cv.n_crossvalidation(1039,QDA,df_train,inputs,'Lead')
+        print(f"error when omitting {i}: {error}")
     
-    np.random.seed(1)
-    y_train, x_train, y_test, x_test = split_test_train(1039,df_train,'Lead',inputs)
+        np.random.seed(1)
+        y_train, x_train, y_test, x_test = split_test_train(1039,df_train,'Lead',inputs)
     
     
-    for k in range(len(rs)): 
-        FF[k,j],TF[k,j],error = ROC(QDA,rs[k], x_train, y_train, x_test, y_test)
+        for k in range(len(rs)): 
+            FF[k,j],TF[k,j],error = ROC(QDA,rs[k], x_train, y_train, x_test, y_test)
         
         
-    j+=1
+        j+=1
 
-plt.plot(FF[:,0],TF[:,0],label = 'No. words female')
-plt.plot(FF[:,1],TF[:,1],label = 'No. words male')
-plt.plot(FF[:,2],TF[:,2], label = 'Year')
-plt.plot(FF[:,3],TF[:,3],label = 'Gross')
+    plt.plot(FF[:,0],TF[:,0],label = 'No. words female')
+    plt.plot(FF[:,1],TF[:,1],label = 'No. words male')
+    plt.plot(FF[:,2],TF[:,2], label = 'Year')
+    plt.plot(FF[:,3],TF[:,3],label = 'Gross')
 
-plt.legend()
-plt.show()
+    plt.legend()
+    plt.show()
 
-#Error when including only one of each input in prob3_inputs
+    #Error when including only one of each input in prob3_inputs
 
-for i in prob3_inputs:
-    inp =  np.array([i])
-    qda_enew,evec = cv.crossvalidation(1039,QDA,df_train,inp,'Lead')
+    for i in prob3_inputs:
+        inp =  np.array([i])
+        qda_enew,evec = cv.crossvalidation(1039,QDA,df_train,inp,'Lead')
 
-    print('\n Estimated test error for input ',i, ', QDA:', qda_enew)
+        print('\n Estimated test error for input ',i, ', QDA:', qda_enew)
 
 
 

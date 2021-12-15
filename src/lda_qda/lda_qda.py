@@ -7,13 +7,16 @@ sys.path.insert(1, p)
 
 import constants as const
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
 import sklearn.discriminant_analysis as skl_da
 import crossvalidation as cv
 import itertools
 import warnings
+from sklearn.metrics import balanced_accuracy_score
+import sklearn.linear_model as skl_lm
+import sklearn.neighbors as skl_n
 
+from feature_importance import split_test_train
 #%%
 def optimal_inputs_discrimanant_analysis(inputs):
     QDA = skl_da.QuadraticDiscriminantAnalysis()
@@ -69,14 +72,39 @@ lda_enew, lda_vec = cv.n_crossvalidation(1039,LDA,df_train,optimal_inputs,'Lead'
 print(f" LDA test error with optimalo inputs: {lda_enew}")
 print(f" QDA test error with optimal inputs: {qda_enew}")
 
+#%% 
+#Balanced accuracy
+def balanced_accuracy_QDA():
+    y_train, x_train, y_test, x_test = split_test_train(1039,df_train,'Lead',x=all_inputs)
+     
+    model = QDA.fit(x_train, y_train)
+    model = QDA.fit(x_train, y_train)
+    y_predict = model.predict(x_test)
+    
+    logreg_balanced_accuracy = balanced_accuracy_score(y_test, y_predict)
+    QDA_balanced_accuracy = balanced_accuracy_score(y_test, y_predict)
+    print(f" balanced accuracy for QDA, all inputs: {logreg_balanced_accuracy}")
+
+    y_train, x_train, y_test, x_test = split_test_train(1039,df_train,'Lead',x=optimal_inputs)
+    model = QDA.fit(x_train, y_train)
+    y_predict = model.predict(x_test)
+    QDA_balanced_accuracy = balanced_accuracy_score(y_test, y_predict)
+    print(f" balanced accuracy for QDA, optimal inputs: {QDA_balanced_accuracy}")
+
+balanced_accuracy_QDA()
 #%%
 #Production model
+def production_model():
+    x_train = df_train[optimal_inputs]
+    y_train = df_train["Lead"]
+    x_test = df_test[optimal_inputs]
+    model = QDA.fit(x_train, y_train)
 
-x_train = df_train[optimal_inputs]
-y_train = df_train["Lead"]
-x_test = df_test[optimal_inputs]
-model = QDA.fit(x_train, y_train)
-
-Y_predict = model.predict(x_test)
-print((Y_predict== 'Male').sum(),(Y_predict== 'Female').sum())
+    Y_predict = model.predict(x_test)
+    
+    # convert array into dataframe
+    DF_predict = pd.DataFrame(Y_predict)
+  
+    # save the dataframe as a csv file
+    DF_predict.to_csv("predicted_gender.csv")
 

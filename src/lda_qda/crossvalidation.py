@@ -4,6 +4,7 @@
 import numpy as np
 import sklearn.model_selection as skl_ms
 
+
 def method_error(method,x_train, y_train, x_valid, y_valid):
     model = method.fit(x_train, y_train)
     prediction = model.predict(x_valid)
@@ -27,6 +28,7 @@ def crossvalidation(n,model,dataframe, inputs,output):
     error = np.mean(misclassification)
     
     return error,misclassification
+
 
 def n_crossvalidation(n,method,train_data,inputs,output):
    k = len(train_data)
