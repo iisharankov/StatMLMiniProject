@@ -26,7 +26,6 @@ def classification_tree():
     # importances = pd.DataFrame({'feature': X_train.columns, 'importance': np.round(clf.feature_importances_, 3)})
     # importances = importances.sort_values('importance', ascending=False)
     # print(f"importances are\n {importances}")
-
     return clf
 
 
@@ -55,7 +54,7 @@ def adaboosting():
 
 def grad_boosting():
     gb_clf = GradientBoostingClassifier(n_estimators=n, learning_rate=0.44,
-                                        max_features=10, max_depth=3, random_state=R)
+                                        max_features=5, max_depth=3, random_state=R)
     gb_clf.fit(X_train, Y_train)
     return gb_clf
 
@@ -67,13 +66,16 @@ def cross_validation(model, x, y, n):
     accuracy = -1 if isinstance(X_val, int) else round(model.score(X_val, Y_val), 3)
     validation = round(1 - np.mean(np.absolute(scores)), 3)
 
-    print(len(scores), 1 - np.array(scores))
-    print(f"Accuracy score={accuracy} - cross_validation= {validation}")
+    # print(len(scores), 1 - np.array(scores))
+    print(f"Accu"
+          f"racy score={accuracy} - cross_validation= {validation}")
 
 
 if __name__ == "__main__":
-    R = 1  # Random state
-    gaps = 104
+    R = np.random.seed(1)  # Random state
+    gaps = 25
+
+
 
     def warn(*args, **kwargs):
         pass
@@ -93,14 +95,14 @@ if __name__ == "__main__":
 
     n = int(np.ceil(len(X_train) / gaps))
     #
-    print("- - - - Starting Simple Classification Trees method - - - - ")
-    cross_validation(classification_tree(), X_train, Y_train, n)
-
-    print("- - - - Starting Random Forrest method - - - - ")
-    cross_validation(random_forest(), X_train, Y_train, n)
-
-    print("- - - - Starting Bagging method - - - - ")
-    cross_validation(bagging(), X_train, Y_train, n)
+    # print("- - - - Starting Simple Classification Trees method - - - - ")
+    # cross_validation(classification_tree(), X_train, Y_train, n)
+    #
+    # print("- - - - Starting Random Forrest method - - - - ")
+    # cross_validation(random_forest(), X_train, Y_train, n)
+    #
+    # print("- - - - Starting Bagging method - - - - ")
+    # cross_validation(bagging(), X_train, Y_train, n)
 
     print("- - - - Starting Boosting method - - - - ")
     cross_validation(adaboosting(), X_train, Y_train, n)
